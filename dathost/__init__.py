@@ -20,7 +20,7 @@ from .models.match import MatchModel
 from httpx import AsyncClient, Client
 
 
-__version__ = "0.0.1"
+__version__ = "0.1.0"
 __url__ = "https://github.com/WardPearce/dathost"
 __description__ = "Asynchronous / Synchronous dathost API wrapper."
 __author__ = "WardPearce"
@@ -32,7 +32,10 @@ class Awaiting(Base, AwaitingHttp):
     def __init__(self, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
 
-        self._client = AsyncClient(auth=self._basic_auth)
+        self._client = AsyncClient(
+            auth=self._basic_auth,
+            timeout=self._timeout
+        )
 
     async def __aenter__(self):
         return self
@@ -40,16 +43,14 @@ class Awaiting(Base, AwaitingHttp):
     async def __aexit__(self, exc_type, exc_val, exc_tb):
         await self.close()
 
-    async def create_match(self, match_settings: MatchSettings,
-                           timeout: int = 60) -> (MatchModel, AwaitingMatch):
+    async def create_match(self, match_settings: MatchSettings
+                           ) -> typing.Tuple[MatchModel, AwaitingMatch]:
         """Creates a match.
 
         Parameters
         ----------
         match_settings : MatchSettings
             Holds details on the match.
-        timeout : int, optional
-            by default 60
 
         Returns
         -------
@@ -63,7 +64,6 @@ class Awaiting(Base, AwaitingHttp):
             MATCHES.create,
             data=match_settings.playload,
             read_json=True,
-            timeout=timeout
         )
 
         return MatchModel(data), self.match(data["id"])
@@ -87,7 +87,7 @@ class Awaiting(Base, AwaitingHttp):
         )
 
     async def create_server(self, settings: ServerSettings
-                            ) -> (ServerModel, ServerAwaiting):
+                            ) -> typing.Tuple[ServerModel, ServerAwaiting]:
         """Creates a new server.
 
         Parameters
@@ -185,7 +185,10 @@ class Blocking(Base, BlockingHttp):
     def __init__(self, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
 
-        self._client = Client(auth=self._basic_auth)
+        self._client = Client(
+            auth=self._basic_auth,
+            timeout=self._timeout
+        )
 
     def __enter__(self):
         return self
@@ -194,15 +197,13 @@ class Blocking(Base, BlockingHttp):
         self.close()
 
     def create_match(self, match_settings: MatchSettings,
-                     timeout: int = 60) -> (MatchModel, BlockingMatch):
+                     ) -> typing.Tuple[MatchModel, BlockingMatch]:
         """Creates a match.
 
         Parameters
         ----------
         match_settings : MatchSettings
             Holds details on the match.
-        timeout : int, optional
-            by default 60
 
         Returns
         -------
@@ -216,7 +217,6 @@ class Blocking(Base, BlockingHttp):
             MATCHES.create,
             data=match_settings.playload,
             read_json=True,
-            timeout=timeout
         )
 
         return MatchModel(data), self.match(data["id"])
@@ -240,7 +240,7 @@ class Blocking(Base, BlockingHttp):
         )
 
     def create_server(self, settings: ServerSettings
-                      ) -> (ServerModel, ServerBlocking):
+                      ) -> typing.Tuple[ServerModel, ServerBlocking]:
         """Creates a new server.
 
         Parameters
