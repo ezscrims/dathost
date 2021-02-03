@@ -1,5 +1,3 @@
 httpx
 asynctest
 aiofiles
-sphinxcontrib-trio
-sphinx-material
